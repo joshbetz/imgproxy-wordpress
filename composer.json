@@ -1,0 +1,12 @@
+{
+    "name": "joshbetz/imgproxy",
+    "require": {
+        "kornrunner/blurhash": "^1.2"
+    },
+    "authors": [
+        {
+            "name": "Josh Betz",
+            "email": "j@joshbetz.com"
+        }
+    ]
+}
