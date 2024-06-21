@@ -74,7 +74,18 @@ function blurhash($attachment_id) {
 		$pixels[] = $row;
 	}
 
-	return Blurhash::encode($pixels, BLURHASH_COMPONENTS_X, BLURHASH_COMPONENTS_Y);
+	// Adjust components for landscape vs portrait images
+	// Wide images should have more components on the x-axis
+	// Tall images should have more components on the y-axis
+	$components_x = BLURHASH_COMPONENTS_Y;
+	$components_y = BLURHASH_COMPONENTS_Y;
+	if ($width > $height) {
+		$components_x = BLURHASH_COMPONENTS_X;
+	} else if ($height > $width) {
+		$components_y = BLURHASH_COMPONENTS_X;
+	}
+
+	return Blurhash::encode($pixels, $components_x, $components_y);
 }
 
 function blurhashToBase64($blurhash, $width, $height) {
