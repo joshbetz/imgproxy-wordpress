@@ -35,6 +35,9 @@ function add_background_image_style_to_attachment_images($attr, $attachment, $si
 		return $attr;
 	}
 
+	// This is a blurry image anyway, so don't waste too much memory rendering it
+	list($width, $height) = wp_constrain_dimensions($width, $height, 250, 250);
+
 	$style = blurhashToBase64($blurhash, $width, $height);
 	if (!$style) {
 		return $attr;
