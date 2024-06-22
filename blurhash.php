@@ -121,3 +121,15 @@ function blurhashToBase64($blurhash, $width, $height) {
 	$base64Url = 'data:image/png;base64,' . $base64;
 	return sprintf('background-size: cover; background-image: url(%s);', $base64Url);
 }
+
+\WP_CLI::add_command( 'imgproxy generate', function( $args, $assoc_args ) {
+	if (empty($args)) {
+		\WP_CLI::error('Please provide attachment IDs');
+	}
+
+	$args = array_map('intval', $args);
+	foreach( $args as $attachment_id ) {
+		$blurhash = blurhash($attachment_id);
+		update_post_meta($attachment_id, '_blurhash', $blurhash);
+	}
+} );
