@@ -43,7 +43,7 @@ function add_background_image_style_to_attachment_images($attr, $attachment, $si
 		return $attr;
 	}
 
-	$attr['style'] = $style;
+	$attr['style'] = sprintf('background-size: cover; background-image: url(%s);', $style);
 	return $attr;
 }
 add_filter('wp_get_attachment_image_attributes', 'Imgproxy\add_background_image_style_to_attachment_images', 10, 3);
@@ -92,37 +92,47 @@ function blurhash($attachment_id) {
 }
 
 function blurhashToBase64($blurhash, $width, $height) {
-	// Decode the BlurHash to get the color components
-	$pixels = Blurhash::decode($blurhash, $width, $height);
-
-	// Create an image resource
-	$image = imagecreatetruecolor($width, $height);
-
-	// Fill the image with the decoded pixel colors
-	for ($y = 0; $y < $height; $y++) {
-		for ($x = 0; $x < $width; $x++) {
-			$color = $pixels[$y][$x];
-			$r = round($color[0]);
-			$g = round($color[1]);
-			$b = round($color[2]);
-			$colorIndex = imagecolorallocate($image, $r, $g, $b);
-			imagesetpixel($image, $x, $y, $colorIndex);
+	$base64 = wp_cache_get($blurhash . $width . $height, 'blurhash');
+	if (!$base64) {
+		// Decode the BlurHash to get the color components
+		$pixels = Blurhash::decode($blurhash, $width, $height);
+		if (!$pixels) {
+			return false;
 		}
+
+		// Create an image resource
+		$image = imagecreatetruecolor($width, $height);
+		if (!$image) {
+			return false;
+		}
+
+		// Fill the image with the decoded pixel colors
+		for ($y = 0; $y < $height; $y++) {
+			for ($x = 0; $x < $width; $x++) {
+				$color = $pixels[$y][$x];
+				$r = round($color[0]);
+				$g = round($color[1]);
+				$b = round($color[2]);
+				$colorIndex = imagecolorallocate($image, $r, $g, $b);
+				imagesetpixel($image, $x, $y, $colorIndex);
+			}
+		}
+
+		// Capture the output to a variable
+		ob_start();
+		imagepng($image);
+		$imageData = ob_get_contents();
+		ob_end_clean();
+
+		// Destroy the image resource
+		imagedestroy($image);
+
+		// Encode the image data to base64
+		$base64 = base64_encode($imageData);
+		wp_cache_set($blurhash . $width . $height, $base64, 'blurhash');
 	}
 
-	// Capture the output to a variable
-	ob_start();
-	imagepng($image);
-	$imageData = ob_get_contents();
-	ob_end_clean();
-
-	// Destroy the image resource
-	imagedestroy($image);
-
-	// Encode the image data to base64
-	$base64 = base64_encode($imageData);
-	$base64Url = 'data:image/png;base64,' . $base64;
-	return sprintf('background-size: cover; background-image: url(%s);', $base64Url);
+	return 'data:image/png;base64,' . $base64;
 }
 
 if (defined('WP_CLI') && WP_CLI) {
