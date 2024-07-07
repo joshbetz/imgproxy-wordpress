@@ -11,6 +11,10 @@ if ( !class_exists( 'kornrunner\Blurhash\Blurhash' ) ) {
 	return;
 }
 
+if ( defined('BLURHASH_DISABLED') && BLURHASH_DISABLED === true ) {
+	return;
+}
+
 use kornrunner\Blurhash\Blurhash;
 
 defined('BLURHASH_COMPONENTS_X' ) || define('BLURHASH_COMPONENTS_X', 4);
