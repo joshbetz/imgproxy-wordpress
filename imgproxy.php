@@ -13,10 +13,6 @@ require_once __DIR__ . '/class-imgproxy-image.php';
 require_once __DIR__ . '/blurhash.php';
 require_once __DIR__ . '/admin.php';
 
-define('BLURHASH_COMPONENTS_X', 4);
-define('BLURHASH_COMPONENTS_Y', 3);
-define('BLURHASH_MAX_RESIZE', 64);
-
 if ( ! baseurl() ) {
 	return;
 }

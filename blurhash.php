@@ -5,6 +5,10 @@ namespace Imgproxy;
 require_once __DIR__ . '/vendor/autoload.php';
 use kornrunner\Blurhash\Blurhash;
 
+defined('BLURHASH_COMPONENTS_X' ) || define('BLURHASH_COMPONENTS_X', 4);
+defined('BLURHASH_COMPONENTS_Y' ) || define('BLURHASH_COMPONENTS_Y', 3);
+defined('BLURHASH_MAX_RESIZE' ) || define('BLURHASH_MAX_RESIZE', 64);
+
 function calculate_blurhash($attachment_id) {
 	$blurhash = blurhash($attachment_id);
 	if (!$blurhash) {
