@@ -2,7 +2,15 @@
 
 namespace Imgproxy;
 
-require_once __DIR__ . '/vendor/autoload.php';
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
+if ( !class_exists( 'kornrunner\Blurhash\Blurhash' ) ) {
+	// Only enable blurhash if we have the vendored dependencies
+	return;
+}
+
 use kornrunner\Blurhash\Blurhash;
 
 defined('BLURHASH_COMPONENTS_X' ) || define('BLURHASH_COMPONENTS_X', 4);
