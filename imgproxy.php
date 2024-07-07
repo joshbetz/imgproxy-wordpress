@@ -9,10 +9,15 @@
 namespace Imgproxy;
 
 require_once __DIR__ . '/blurhash.php';
+require_once __DIR__ . '/admin.php';
 
 define('BLURHASH_COMPONENTS_X', 4);
 define('BLURHASH_COMPONENTS_Y', 3);
 define('BLURHASH_MAX_RESIZE', 64);
+
+if ( ! baseurl() ) {
+	return;
+}
 
 // Disable intermediate image generation
 add_filter( 'intermediate_image_sizes_advanced', '__return_empty_array' );
@@ -276,8 +281,7 @@ function get_srcset_threshold() {
 }
 
 function imgproxy() {
-	$default_url = defined('IMGPROXY_URL') ? IMGPROXY_URL : 'https://i.99systems.net';
-	$url = apply_filters('imgproxy_url', $default_url);
+	$url = baseurl();
 	return new Imgproxy($url);
 }
 
