@@ -280,5 +280,8 @@ function get_srcset_threshold() {
 
 function imgproxy() {
 	$url = baseurl();
-	return new Imgproxy($url);
+	$key = signing_key();
+	$salt = signing_salt();
+
+	return new Imgproxy($url, $key, $salt);
 }

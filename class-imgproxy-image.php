@@ -12,6 +12,20 @@ class ImgproxyImage {
 	private $base_url;
 
 	/**
+	 * The signing key of the imgproxy server
+	 *
+	 * @var string
+	 */
+	private $signing_key;
+
+	/**
+	 * The signing salt of the imgproxy server
+	 *
+	 * @var string
+	 */
+	private $signing_salt;
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $image_url The URL of the image to be processed
@@ -25,8 +39,10 @@ class ImgproxyImage {
 	 */
 	private $params;
 
-	function __construct($base_url, $image_url, $params = []) {
+	function __construct($base_url, $signing_key, $signing_salt, $image_url, $params = []) {
 		$this->base_url = $base_url;
+		$this->signing_key = $signing_key;
+		$this->signing_salt = $signing_salt;
 		$this->image_url = $image_url;
 		$this->params = $params;
 	}
@@ -44,15 +60,19 @@ class ImgproxyImage {
 		$encoded_url = str_replace($basename, $encoded_basename, $this->image_url);
 		$encoded_params = $this->encode_params($this->params);
 
-		$url = $this->base_url . '/i/';
-
 		if ($encoded_params) {
-			$url .= $encoded_params . '/';
+			$path = '/' . $encoded_params . '/plain/' . $encoded_url;
+		} else {
+			$path = '/plain/' . $encoded_url;
 		}
 
-		$url .= 'plain/' . $encoded_url;
+		if ($this->signing_key == null or $this->signing_key == '' or $this->signing_salt == null or $this->signing_salt == '') {
+			return $this->base_url . '/i' . $path;
+		} else {
+			$signature = $this->get_path_signature($path);
 
-		return $url;
+			return $this->base_url . '/' . $signature . $path;
+		}
 	}
 
 	/**
@@ -69,6 +89,29 @@ class ImgproxyImage {
 		}
 
 		return implode('/', $encoded_params);
+	}
+
+	/**
+	 * Sign path to the image
+	 *
+	 * @param string $path Path to be signed
+	 * @return string Signed path as string
+	 */
+	private function get_path_signature($path)
+	{
+		$keyBin = pack("H*", $this->signing_key);
+
+		if (empty($keyBin)) {
+			die('Key expected to be hex-encoded string');
+		}
+
+		$saltBin = pack("H*", $this->signing_salt);
+
+		if (empty($saltBin)) {
+			die('Salt expected to be hex-encoded string');
+		}
+
+		return rtrim(strtr(base64_encode(hash_hmac('sha256', $saltBin . $path, $keyBin, true)), '+/', '-_'), '=');
 	}
 
 	/**
